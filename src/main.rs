@@ -1,22 +1,19 @@
-use rdev::listen;
-use std::sync::mpsc::channel;
-use std::thread;
+use rdev::{grab, Event, EventType, Key};
 
 fn main() {
-    // spawn new thread because listen blocks
-    let (schan, rchan) = channel();
-    let _listener = thread::spawn(move || {
-        listen(move |event| {
-            schan
-                .send(event)
-                .unwrap_or_else(|e| println!("Could not send event {:?}", e));
-        })
-        .expect("Could not listen");
-    });
+    // This will block.
+    if let Err(error) = grab(callback) {
+        println!("Error: {:?}", error)
+    }
+}
 
-    let mut events = Vec::new();
-    for event in rchan.iter() {
-        println!("Received {:?}", event);
-        events.push(event);
+fn callback(event: Event) -> Option<Event> {
+    println!("My callback {:?}", event);
+    match event.event_type {
+        EventType::KeyPress(Key::Tab) => {
+            println!("Cancelling tab !");
+            None
+        }
+        _ => Some(event),
     }
 }

@@ -1,7 +1,8 @@
 [package]
-name = "macOS-keyboard-for-window"
+name = "macos_keyboard_for_window"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rdev = "0.5.2"
+rdev = { version="0.5.2", features=["unstable_grab", "serialize"]}
+serde_cbor = "0.11.1"
