@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rdev = { version="0.5.2", features=["unstable_grab", "serialize"]}
+rdev = { path="rdev", features=["unstable_grab", "serialize"]}
 serde_cbor = "0.11.1"
