@@ -26,6 +26,10 @@ At the end of the release state, if vec[] is empty then emit the action regards 
 - Restriction: 
     + Only record a key that is not being pressed or a key that is already released.
     + Do not emit action while a key is pressed.
+    + Only put on listening mode if a special key (control, shift, cmd) is pressed. Otherwise, ignore
 
 Or let's reconsider:
 We just need to map Ctrl to Cmd. This is a hacky way but not the right way. Map one key will possible break different combination. eg: _Control-Command-F: Use the app in full screen, if supported by the app._ will become _Command-Command-F_
+
+---
+Create a mapper list. Record combination will reflect on that list to decide whether mapping or not.
