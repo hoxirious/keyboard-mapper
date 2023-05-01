@@ -26,3 +26,6 @@ At the end of the release state, if vec[] is empty then emit the action regards 
 - Restriction: 
     + Only record a key that is not being pressed or a key that is already released.
     + Do not emit action while a key is pressed.
+
+Or let's reconsider:
+We just need to map Ctrl to Cmd. This is a hacky way but not the right way. Map one key will possible break different combination. eg: _Control-Command-F: Use the app in full screen, if supported by the app._ will become _Command-Command-F_
