@@ -13,7 +13,6 @@ impl EventRecord {
     /// Return List of keys if success.
     pub fn get_combination(&mut self) -> Result<Vec<EventType>, EventRecordErrors>{
         let mut combination: Vec<EventType> = Vec::new();
-        //if self.key_pressed_record.len() > 0 && self.key_pressed_record.len() == self.key_released_record.len() {
             for i in 0..self.key_pressed_record.len() {
                     // Push valid key to combination
                     combination.push(self.key_pressed_record[i]);
@@ -32,21 +31,21 @@ impl EventRecord {
 
     /// Only record a key that is not being pressed or a key that is already released.
     pub fn on_key_pressed(&mut self, event: Event) {
-        let is_key_pressing = self.key_pressed_record.contains(&event.event_type); // BUG ALERT: event object has time, cannot compare
+        let is_given_event_key_pressing = self.key_pressed_record.contains(&event.event_type);
         let should_listen_mode: bool = self.should_listen_mode();
-        match !is_key_pressing && should_listen_mode {
+        match !is_given_event_key_pressing && should_listen_mode {
             true => self.key_pressed_record.push(event.event_type),
             false => {},
         }
     }
 
-    /// `should_listen_mode` will reinforce the bool check for `on_key_pressed()`
+    /// `should_listen_mode` will reinforce the bool check for `on_key_pressed()`\
+    /// Revent from creating combination of non-special keys and support special key combination
     pub fn should_listen_mode(&mut self) -> bool {
         let pressed_record_len = self.key_pressed_record.len();
         if pressed_record_len == 0 {
             return true;
         }
-
         // key pressed record must have value to create combination
         // And the present values must be special key
         else if pressed_record_len > 0 {
