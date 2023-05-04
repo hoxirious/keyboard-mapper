@@ -1,7 +1,12 @@
 use rdev::{Event, EventType, Key};
-
+use serde::Deserialize;
 use crate::{errors::EventRecordErrors, actions::Action};
 
+#[derive(Deserialize)]
+pub struct EventTypeMap {
+    pub key: Vec<EventType>,
+    pub value: Vec<EventType>
+}
 
 #[derive(Debug)]
 pub struct EventRecord {
@@ -76,7 +81,8 @@ impl EventRecord {
             let combination_result = self.get_combination();
             match combination_result {
                 Ok(combination) => {
-                    Action::new(combination);
+                    let action = Action::new(combination);
+                    action.emit();
                 },
                 Err(error) => println!("{:?}", error),
             }

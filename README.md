@@ -33,3 +33,4 @@ We just need to map Ctrl to Cmd. This is a hacky way but not the right way. Map 
 
 ---
 Create a mapper list. Record combination will reflect on that list to decide whether mapping or not.
+https://docs.rs/lazy_static/1.4.0/lazy_static/
