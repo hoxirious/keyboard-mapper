@@ -1,13 +1,12 @@
-- Key mapping
-
-- Goal is to map ctrl + c/v to cmd + c/v
-
-- Listen for combination
+[x] Key mapping
+[x] Listen for combination
+[ ] Error handling
+[ ] Native app
 
 ---
-listen to listen to keyboard events on a port (like socket)
-grab to grab keyboard event globably
-serialize to serialize event data
+- `listen` to listen to keyboard events on a port (like socket)
+- `grab` to grab keyboard event globably
+- `serialize` to serialize event data
 
 
 ---
@@ -23,7 +22,7 @@ Create vec[] of `eventData` that will be appended based on EventType:
 - `EventType::KeyRelease`: End of recording -> pop the according event
 At the end of the release state, if vec[] is empty then emit the action regards to the recorded combination
 
-- Restriction: 
+- Restriction:
     + Only record a key that is not being pressed or a key that is already released.
     + Do not emit action while a key is pressed.
     + Only put on listening mode if a special key (control, shift, cmd) is pressed. Otherwise, ignore
