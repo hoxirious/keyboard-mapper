@@ -1,7 +1,7 @@
-[x] Key mapping
-[x] Listen for combination
-[ ] Error handling
-[ ] Native app
+- [x] Key mapping
+- [x] Listen for combination
+- [ ] Error handling
+- [ ] Native app
 
 ---
 - `listen` to listen to keyboard events on a port (like socket)
