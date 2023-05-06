@@ -42,7 +42,7 @@ impl Action {
 }
 
 /// Search for the mapper of the given input `key_combination` from the static hashmap
-fn get_key_mapper(key_combinastion: &Vec<Event>) -> Vec<EventType> {
+fn get_key_mapper(key_combination: &Vec<Event>) -> Vec<EventType> {
     
     let mut event_type_list: Vec<EventType> = Vec::new();
 
