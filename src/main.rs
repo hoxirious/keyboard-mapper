@@ -25,7 +25,6 @@ lazy_static! {
         }
         m
     });
-
 }
 // Static event records
 
@@ -44,7 +43,7 @@ fn callback(event: Event) -> Option<Event>{
             None
         }
         EventType::KeyRelease(_) => {
-            RECORDS.lock().unwrap().on_key_released();
+            RECORDS.lock().unwrap().on_key_released(event);
             None
         }
         _ => Some(event),

@@ -250,6 +250,7 @@ pub enum EventType {
     },
 }
 #[derive(PartialEq)]
+#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 pub enum InputEventType {
     Key(Key),
     Button(Button),

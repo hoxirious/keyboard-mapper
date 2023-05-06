@@ -2,5 +2,9 @@
     {
         "key": [{"KeyPress":"ControlLeft"},{"KeyPress":"KeyY"}],
         "value": [{"KeyPress":"ControlLeft"},{"KeyPress":"KeyC"},{"KeyRelease":"KeyC"},{"KeyRelease":"ControlLeft"}]
+    },
+    {
+        "key": [{"KeyPress":"Alt"},{"KeyPress":"Tab"}],
+        "value": [{"KeyPress":"Alt"},{"KeyPress":"Tab"},{"KeyRelease":"Tab"},{"KeyRelease":"Alt"}]
     }
 ]
