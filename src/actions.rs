@@ -2,7 +2,7 @@ use std::{time, thread};
 
 use rdev::{EventType, simulate, SimulateError, Event};
 use serde::{Deserialize, Serialize};
-use crate::{MAPPER};
+use crate::MAPPER;
 
 #[derive(Serialize, Deserialize)]
 pub struct Action {
@@ -22,15 +22,15 @@ impl Action {
 
     /// After `new` is called to construct the Action struct,
     /// `emit` will simulate the corresponding key combination
-    pub fn emit(&self) {
+    pub fn emit(&mut self) {
         if self.key_mapper.is_empty() {
-            println!("The key combination has not been mapped!");
+            println!("No key event to simulate!");
         }
 
         for event_type in self.key_mapper.iter() {
-            let delay = time::Duration::from_millis(20);
+            let delay = time::Duration::from_millis(50);
                 match simulate(event_type) {
-                Ok(()) => println!("success"),
+                Ok(()) => println!("success: "),
                 Err(SimulateError) => {
                     println!("We could not send {:?}", event_type);
                 }
@@ -38,12 +38,18 @@ impl Action {
             // Let ths OS catchup (at least MacOS)
             thread::sleep(delay);
         }
+        self.reset_records();
+    }
+
+    pub fn reset_records(&mut self) {
+        self.key_combination.clear();
+        self.key_mapper.clear();
     }
 }
 
 /// Search for the mapper of the given input `key_combination` from the static hashmap
 fn get_key_mapper(key_combination: &Vec<Event>) -> Vec<EventType> {
-    
+
     let mut event_type_list: Vec<EventType> = Vec::new();
 
     for key in key_combination.iter() {

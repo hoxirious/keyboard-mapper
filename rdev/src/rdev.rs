@@ -249,31 +249,6 @@ pub enum EventType {
         delta_y: i64,
     },
 }
-#[derive(PartialEq)]
-#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
-pub enum InputEventType {
-    Key(Key),
-    Button(Button),
-    MouseMove{
-        x: f64,
-        y: f64,
-    },
-    Wheel{
-        delta_x: i64,
-        delta_y: i64,
-    }
-}
-
-impl EventType {
-    pub fn get_event_type_value(self) -> InputEventType {
-        match self {
-            EventType::KeyPress(value) | EventType::KeyRelease(value) => InputEventType::Key(value),
-            EventType::ButtonRelease(value) | EventType::ButtonPress(value) => InputEventType::Button(value),
-            EventType::MouseMove { x, y } => InputEventType::MouseMove {x, y},
-            EventType::Wheel { delta_x, delta_y } => InputEventType::Wheel{delta_x, delta_y},
-        }
-    }
-}
 
 /// When events arrive from the OS they get some additional information added from
 /// EventType, which is the time when this event was received, and the name Option

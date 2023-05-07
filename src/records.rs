@@ -1,6 +1,6 @@
 use rdev::{Event, EventType, Key};
 use serde::Deserialize;
-use crate::{errors::EventRecordErrors, actions::Action};
+use crate::{errors::EventRecordErrors, actions::Action, SPECIAL_KEY_LIST};
 
 #[derive(Deserialize)]
 pub struct EventTypeMap {
@@ -59,21 +59,17 @@ impl EventRecord {
      *      + otherwise -> record -> emit -> reset
      */
     pub fn on_key_pressed(&mut self, event: Event) {
-        let special_key_list = vec![
-            EventType::KeyPress(Key::Alt).get_event_type_value(),
-            EventType::KeyPress(Key::ControlLeft).get_event_type_value(),
-            EventType::KeyPress(Key::ControlRight).get_event_type_value(),
-            EventType::KeyPress(Key::AltGr).get_event_type_value(),
-            EventType::KeyPress(Key::MetaLeft).get_event_type_value(),
-            EventType::KeyPress(Key::MetaRight).get_event_type_value(),
-            EventType::KeyPress(Key::ShiftLeft).get_event_type_value(),
-            EventType::KeyPress(Key::ShiftRight).get_event_type_value(),
-        ];
+        let key = match event.event_type {
+            EventType::KeyPress(key) => {
+                key
+            },
+            _ => Key::Unknown(0)
+        };
         
         // Which type of key is this.
-        let is_special_key = special_key_list.contains(&event.event_type.get_event_type_value());
+        let is_special_key = SPECIAL_KEY_LIST.lock().unwrap().contains(&key);
         let is_key_pressing = self.is_key_pressing(event.event_type);
-
+        
         match is_special_key {
             true => {
                 println!("{:?}", self.key_pressed_record);
@@ -87,16 +83,17 @@ impl EventRecord {
                         let combination_result = self.get_combination();
                         match combination_result {
                             Ok(combination) => {
-                                let action = Action::new(combination);
+                                let mut action = Action::new(combination);
                                 action.emit();
                             },
-                                Err(error) => println!("{:?}", error),
-                            }
-                            self.reset_records();
+                            Err(error) => println!("{:?}", error),
+                        }
+                        self.reset_records();
                         },
                     false => {
-                        let action = Action::new(vec![event]);
+                        let mut action = Action::new(vec![event]);
                         action.emit();
+                        self.reset_records();
                     },
                 }
             },
@@ -107,22 +104,8 @@ impl EventRecord {
     /// This function will call `get_combination()` and reflect with the mapper list
     /// to emit a corresponding action.
     pub fn on_key_released(&mut self, event: Event) {
-        //if !self.key_pressed_record.is_empty() {
-            // self.key_released_record.push(event);
-            // if self.key_pressed_record.len() == self.key_released_record.len() {
-            //     let combination_result = self.get_combination();
-            //     match combination_result {
-            //         Ok(combination) => {
-            //             let action = Action::new(combination);
-            //             action.emit();
-
-            //     },
-            //         Err(error) => println!("{:?}", error),
-            //     }
-            // }
-        //}
         println!("on_key_released: {:?}", event.event_type);
-        let action = Action::new(vec![event]);
+        let mut action = Action::new(vec![event]);
         action.emit();
         self.reset_records();
     }

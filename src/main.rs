@@ -1,5 +1,5 @@
 use std::{sync::Mutex, fs};
-use rdev::{grab, Event, EventType};
+use rdev::{Event, EventType, Key, listen};
 use records::EventRecord;
 use std::collections::HashMap;
 
@@ -25,27 +25,38 @@ lazy_static! {
         }
         m
     });
+
+    static ref SPECIAL_KEY_LIST: Mutex<Vec<Key>> = Mutex::new({
+        let sp = vec![
+            Key::Alt,
+            Key::ControlLeft,
+            Key::ControlRight,
+            Key::AltGr,
+            Key::MetaLeft,
+            Key::MetaRight,
+            Key::ShiftLeft,
+            Key::ShiftRight,
+        ];
+        sp
+    });
 }
+
 // Static event records
-
-
 fn main() {
     // This will block.
-    if let Err(error) = grab(callback) {
-        println!("Error: {:?}", error)
-    }
-}
-
-fn callback(event: Event) -> Option<Event>{
-    match event.event_type {
-        EventType::KeyPress(_) => {
-            RECORDS.lock().unwrap().on_key_pressed(event);
-            None
-        }
-        EventType::KeyRelease(_) => {
-            RECORDS.lock().unwrap().on_key_released(event);
-            None
-        }
-        _ => Some(event),
-    }
+    std::env::set_var("KEYBOARD_ONLY", "y");
+    if let Err(err) = listen(move |event: Event|
+        {
+            match event.event_type {
+                EventType::KeyPress(_) => {
+                println!("-------------hello wolrd");
+                RECORDS.lock().unwrap().on_key_pressed(event);
+            }
+            EventType::KeyRelease(_) => {
+                RECORDS.lock().unwrap().on_key_released(event);
+            }
+            _ => {},
+        }}) {
+        println!("start grab listen error: {:?}", err);
+    };
 }
