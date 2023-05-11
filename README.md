@@ -62,3 +62,16 @@ Use lazy_static for static global variables: <https://docs.rs/lazy_static/1.4.0/
 
 - Simulations are listened by the `listen()` method which causes infinite loop.
 - Need to refactor the logic **again** so that we ensure only physically pressed/released key are listened and emitted event.
+
+- Refactor logic:
+
+> - Key Press:
+>   - if special key -> set special key hashmap to true -> return
+>   - else -> process_event
+> - Key Release:
+>   - if special key -> set special key hashmap to false
+>   - else -> process_event
+> - Process Event:
+>   - Handle both Press/Release events
+>   - One record vector - push when press, pop when release. Then gather combination and emit.
+>   - Release does not need to get special key.
