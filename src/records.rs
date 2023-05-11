@@ -1,135 +1,75 @@
-use rdev::{Event, EventType, Key};
+use core::time;
+use std::{thread};
+use rdev::{Event, EventType, Key, simulate, SimulateError};
 use serde::Deserialize;
-use crate::{errors::EventRecordErrors, actions::Action};
+use crate::{SPECIAL_KEY_LIST, MAPPER};
 
 #[derive(Deserialize)]
 pub struct EventTypeMap {
-    pub key: Vec<EventType>,
+    pub key: Vec<Key>,
     pub value: Vec<EventType>
 }
+pub fn process_event(event: Event) {
+    match event.event_type {
+        EventType::KeyPress(key) => {
 
-#[derive(Debug)]
-pub struct EventRecord {
-   pub key_pressed_record: Vec<Event>,
-   pub key_released_record: Vec<Event>,
+            let pressing = get_mapper(key);
+            let pressing = match pressing {
+                Some(mapper) => mapper,
+                None => {
+                    let mut pressing: Vec<EventType> = Vec::new();
+                    for spk in SPECIAL_KEY_LIST.lock().unwrap().iter() {
+                        if spk.1.to_owned() {
+                            pressing.push(EventType::KeyPress(spk.0.to_owned()));
+                        }
+                    }
+                    return pressing.push(EventType::KeyPress(key));
+                },
+            };
+            println!("Emitting from press: {:?}", pressing);
+            emit(pressing);
+        },
+        EventType::KeyRelease(key) => {
+            println!("Emitting from release: {:?}", key);
+            emit(vec![EventType::KeyRelease(key)]);
+        },
+        _ => {}
+    };
 }
 
-impl EventRecord {
-    /// Return List of keys if success.
-    pub fn get_combination(&mut self) -> Result<Vec<Event>, EventRecordErrors>{
+fn get_mapper(key_pressed: Key) -> Option<Vec<EventType>>{
 
-            match self.key_pressed_record.len() > 0 {
-                true => {
-                    Ok(self.key_pressed_record.to_owned())
-                }
-                false => {
-                    Err(EventRecordErrors::GetCombinationError)
-                },
+    let mut key = Vec::<Key>::new();
+    for spk in SPECIAL_KEY_LIST.lock().unwrap().iter() {
+        if spk.1.to_owned() {
+            key.push(spk.0.to_owned());
+        }
+    }
+
+    key.push(key_pressed);
+
+    let key = serde_json::to_string(&key).unwrap();
+    println!("Combination found: {key}");
+    match MAPPER.lock().unwrap().get(&key) {
+        Some(mapper) => Some(mapper.to_vec()),
+        None => None,
+    }
+}
+
+fn emit(key_combination: Vec<EventType>) {
+    if key_combination.is_empty() {
+        println!("No key event to simulate!");
+    }
+
+    for event_type in key_combination.iter() {
+        let delay = time::Duration::from_millis(20);
+            match simulate(event_type) {
+            Ok(()) => println!("success: {:?}",event_type),
+            Err(SimulateError) => {
+                println!("We could not send {:?} due to {SimulateError}", event_type);
             }
-    }
-    pub fn is_key_pressing(&self, event_type: EventType) -> bool {
-        match event_type {
-            EventType::KeyPress(_) => {
-                for event in self.key_pressed_record.iter() {
-                    if event.event_type == event_type {
-                        return true;
-                    }
-                }
-                false
-            },
-            EventType::KeyRelease(_) => {
-                for event in self.key_released_record.iter() {
-                    if event.event_type == event_type {
-                        return true;
-                    }
-                }
-                false
-            },
-            _ => todo!(),
         }
-    }
-    /**
-     * When a key is pressed: two types of key
-     *  1. Special keys
-     *  2. Non-special keys
-     *
-     *  - Special key means combination is coming -> we need to record it to map the combination **Only record one time
-     *  - Non-special keys means:
-     *      + if no special keys in front, it is single action so no record needed -> emit
-     *      + otherwise -> record -> emit -> reset
-     */
-    pub fn on_key_pressed(&mut self, event: Event) {
-        let special_key_list = vec![
-            EventType::KeyPress(Key::Alt).get_event_type_value(),
-            EventType::KeyPress(Key::ControlLeft).get_event_type_value(),
-            EventType::KeyPress(Key::ControlRight).get_event_type_value(),
-            EventType::KeyPress(Key::AltGr).get_event_type_value(),
-            EventType::KeyPress(Key::MetaLeft).get_event_type_value(),
-            EventType::KeyPress(Key::MetaRight).get_event_type_value(),
-            EventType::KeyPress(Key::ShiftLeft).get_event_type_value(),
-            EventType::KeyPress(Key::ShiftRight).get_event_type_value(),
-        ];
-        
-        // Which type of key is this.
-        let is_special_key = special_key_list.contains(&event.event_type.get_event_type_value());
-        let is_key_pressing = self.is_key_pressing(event.event_type);
-
-        match is_special_key {
-            true => {
-                println!("{:?}", self.key_pressed_record);
-                if !is_key_pressing { self.key_pressed_record.push(event);}
-            },
-            false => {
-                // if key_pressed_record > 0, it means that a special key has been pushed
-                match self.key_pressed_record.len() > 0 {
-                    true => {
-                        self.key_pressed_record.push(event);
-                        let combination_result = self.get_combination();
-                        match combination_result {
-                            Ok(combination) => {
-                                let action = Action::new(combination);
-                                action.emit();
-                            },
-                                Err(error) => println!("{:?}", error),
-                            }
-                            self.reset_records();
-                        },
-                    false => {
-                        let action = Action::new(vec![event]);
-                        action.emit();
-                    },
-                }
-            },
-        }
-    }
-
-    /// `on_key_released` triggered means the end of the combination records.
-    /// This function will call `get_combination()` and reflect with the mapper list
-    /// to emit a corresponding action.
-    pub fn on_key_released(&mut self, event: Event) {
-        //if !self.key_pressed_record.is_empty() {
-            // self.key_released_record.push(event);
-            // if self.key_pressed_record.len() == self.key_released_record.len() {
-            //     let combination_result = self.get_combination();
-            //     match combination_result {
-            //         Ok(combination) => {
-            //             let action = Action::new(combination);
-            //             action.emit();
-
-            //     },
-            //         Err(error) => println!("{:?}", error),
-            //     }
-            // }
-        //}
-        println!("on_key_released: {:?}", event.event_type);
-        let action = Action::new(vec![event]);
-        action.emit();
-        self.reset_records();
-    }
-
-    /// Reset after combination has been extracted
-    pub fn reset_records(&mut self) {
-        self.key_pressed_record.clear();
-        self.key_released_record.clear();
+        // Let OS catchup (at least MacOS)
+        thread::sleep(delay);
     }
 }

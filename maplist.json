@@ -1,10 +1,10 @@
 [
     {
-        "key": [{"KeyPress":"ControlLeft"},{"KeyPress":"KeyY"}],
+        "key": ["ControlLeft","KeyX"],
         "value": [{"KeyPress":"ControlLeft"},{"KeyPress":"KeyC"},{"KeyRelease":"KeyC"},{"KeyRelease":"ControlLeft"}]
     },
     {
-        "key": [{"KeyPress":"Alt"},{"KeyPress":"Tab"}],
-        "value": [{"KeyPress":"Alt"},{"KeyPress":"Tab"},{"KeyRelease":"Tab"},{"KeyRelease":"Alt"}]
+        "key": ["ControlLeft", "ShiftLeft", "KeyF"],
+        "value": [{"KeyPress":"ControlLeft"},{"KeyPress":"KeyV"},{"KeyRelease":"KeyV"},{"KeyRelease":"ControlLeft"}]
     }
 ]
