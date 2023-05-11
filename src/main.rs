@@ -1,17 +1,14 @@
-use std::{sync::{Mutex}, fs, collections::HashSet};
+use std::{sync::{Mutex}, fs};
 use rdev::{Event, EventType, Key, listen};
-use records::EventRecord;
 use std::collections::HashMap;
 
-use crate::records::EventTypeMap;
+use crate::records::{EventTypeMap, process_event};
 #[macro_use]
 extern crate lazy_static;
 
-mod errors;
 mod records;
 
 lazy_static! {
-    static ref RECORDS: Mutex<EventRecord> = Mutex::new(EventRecord {record: HashSet::new()});
     static ref MAPPER: Mutex<HashMap<String, Vec<EventType>>> = Mutex::new({
         let mut m = HashMap::new();
         let data = fs::read_to_string("./maplist.json").expect("Unable to read file");
@@ -54,7 +51,7 @@ fn main() {
                         SPECIAL_KEY_LIST.lock().unwrap().insert(key, true);
                         return;
                     }
-                    RECORDS.lock().unwrap().process_event(event);
+                    process_event(event);
                 }
                 EventType::KeyRelease(key) => {
                     println!("-------------detect KEY RELEASED");
@@ -63,7 +60,7 @@ fn main() {
                         SPECIAL_KEY_LIST.lock().unwrap().insert(key, false);
                         return;
                     }
-                    RECORDS.lock().unwrap().process_event(event);
+                    process_event(event);
                 }
                 _ => {},
         }}
