@@ -1,8 +1,13 @@
 # My Project Journal
 
+---
+
+## Chapter 1: NO PAIN NO GAIN - NEVER GIVE UP
+
+---
+
 - [x] Key mapping
 - [x] Listen for combination
-- [ ] Error handling
 - [ ] Native app
 
 ---
@@ -12,11 +17,16 @@
 - `serialize` to serialize event data
 
 ---
-**Couldn't run grab function**. Encounter this error: Os { code: 13, kind: PermissionDenied, message: "Permission denied" }
+
+### Couldn't run grab function
+
+Encounter this error: Os { code: 13, kind: PermissionDenied, message: "Permission denied" }
 Resolved by add `input` and `plugdev` into current user's group. Reboot after change
 
 ---
-**Question**: how to record combination keybind on global. We need some kind of keypress/keyrelease controller
+
+### Question: 
+how to record combination keybind on global. We need some kind of keypress/keyrelease controller
 Enum `EventType` has `KeyPress` and `KeyRelease`. What can we do with it?
 Create vec[] of `eventData` that will be appended based on EventType:
 
@@ -33,10 +43,16 @@ At the end of the release state, if vec[] is empty then emit the action regards 
 We just need to map Ctrl to Cmd. This is a hacky way but not the right way. Map one key will possible break different combination. eg: _Control-Command-F: Use the app in full screen, if supported by the app._ will become _Command-Command-F_
 
 ---
-**Create a mapper list**. Record combination will reflect on that list to decide whether mapping or not.
+
+### Create a mapper list
+
+Record combination will reflect on that list to decide whether mapping or not.
 Use lazy_static for static global variables: <https://docs.rs/lazy_static/1.4.0/lazy_static/>
 
 ---
+
+### Rework logic
+
 **Need to rework how app record event:**
 
 - When a key is pressed: two types of key
@@ -58,7 +74,8 @@ Use lazy_static for static global variables: <https://docs.rs/lazy_static/1.4.0/
 **Resolution**: use `listen()` instead. Apparently, this listener is now work globally. Could be a replacement for the old `grab`.
 
 ---
-**New problem:**
+
+### New problem:
 
 - Simulations are listened by the `listen()` method which causes infinite loop.
 - Need to refactor the logic **again** so that we ensure only physically pressed/released key are listened and emitted event.
@@ -75,3 +92,19 @@ Use lazy_static for static global variables: <https://docs.rs/lazy_static/1.4.0/
 >   - Handle both Press/Release events
 >   - One record vector - push when press, pop when release. Then gather combination and emit.
 >   - Release does not need to get special key.
+
+---
+
+### BREAKING NEWS
+
+- Circle back to Narsil's rdev. **AND I HAD FOUND THE ROOT OF THE PAIN!!!!!**
+- grab's callback has `Option<Event>` as a return type. Which is an option to decide passing the event to the OS or not. Silly me! I almost gave up until I decided to look back where I started...
+
+This means **Phase 1** has closed. Thank you for joining me on this **First Chapter of the Rust journey**
+
+---
+
+## Chapter 2:
+
+---
+

@@ -1,7 +1,6 @@
-use std::{sync::{Mutex}, fs};
-use rdev::{Event, EventType, Key, listen};
+use std::{sync::Mutex, fs};
+use rdev::{Event, EventType, Key, grab};
 use std::collections::HashMap;
-
 use crate::records::{EventTypeMap, process_event};
 #[macro_use]
 extern crate lazy_static;
@@ -36,35 +35,34 @@ lazy_static! {
     });
 }
 
-// Static event records
 fn main() {
     // This will block.
-    if let Err(err) = listen(
+    if let Err(err) = grab(
         //test_infinity_loop
         move |event: Event|
         {
             match event.event_type {
                 EventType::KeyPress(key) => {
-                    println!("-------------detect KEY PRESSED");
-                    let is_special_key = SPECIAL_KEY_LIST.lock().unwrap().contains_key(&key);
+                    let is_special_key = SPECIAL_KEY_LIST.lock().unwrap().contains_key(&key) ;
                     if is_special_key {
                         SPECIAL_KEY_LIST.lock().unwrap().insert(key, true);
-                        return;
+                        return Some(event);
                     }
-                    process_event(event);
+
+                    return process_event(event.to_owned());
                 }
                 EventType::KeyRelease(key) => {
-                    println!("-------------detect KEY RELEASED");
                     let is_special_key = SPECIAL_KEY_LIST.lock().unwrap().contains_key(&key);
                     if is_special_key {
                         SPECIAL_KEY_LIST.lock().unwrap().insert(key, false);
-                        return;
+                        return Some(event);
                     }
-                    process_event(event);
+
+                    return process_event(event.to_owned());
                 }
-                _ => {},
+                _ => Some(event),
         }}
     ) {
-        println!("listen error: {:?}", err);
+        println!("grab listen error: {:?}", err);
     };
 }
