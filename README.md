@@ -23,9 +23,66 @@
 Encounter this error: Os { code: 13, kind: PermissionDenied, message: "Permission denied" }
 Resolved by add `input` and `plugdev` into current user's group. Reboot after change
 
+- deps: build-essential, pkg-config, libevdev-dev
+
+```bash
+sudo apt install -y libgtk-3-dev clang libxcb-randr0-dev libxdo-dev libxfixes-dev libxcb-shape0-dev libxcb-xfixes0-dev
+```
+
+### Requirement
+
+Thanks @jersou for the setup solution: <https://github.com/jersou/mouse-actions>
+To use the main feature "grab event", you need to have the read&write permission
+on `/dev/input/event*`. Check the group of `/dev/input/event*` files :
+
+```bash
+ls -al /dev/input/event*
+# > crw-rw---- 1 root input /dev/input/event5
+#                     ^^^^^
+```
+
+You need to add the current user to this group, usually `input` or `plugdev` :
+
+```bash
+sudo usermod -a -G plugdev $USER
+# or
+sudo usermod -a -G input $USER
+```
+
+Furthermore, you must have the read&write permission on `/dev/uinput`, you can
+check with:
+
+```bash
+getfacl /dev/uinput
+# ...
+# user:<the current user>:rw-
+# ...
+```
+
+If this permission is not available on the user, to add it
+temporary : `sudo setfacl -m u:$USER:rw /dev/uinput` or persistent :
+
+```bash
+sudo tee /etc/udev/rules.d/80-mouse-actions.rules <<<'KERNEL=="uinput", SUBSYSTEM=="misc", TAG+="uaccess", OPTIONS+="static_node=uinput"'
+```
+
+You need to restart your desktop session to apply these changes.
+
+To check the user groups and the ACL after the session restart or the reboot:
+
+```bash
+$ groups
+... input ...
+$ getfacl /dev/uinput
+# ...
+# user:<the current user>:rw-
+# ...
+```
+
 ---
 
-### Question: 
+### Question
+
 how to record combination keybind on global. We need some kind of keypress/keyrelease controller
 Enum `EventType` has `KeyPress` and `KeyRelease`. What can we do with it?
 Create vec[] of `eventData` that will be appended based on EventType:
@@ -104,7 +161,6 @@ This means **Phase 1** has closed. Thank you for joining me on this **First Chap
 
 ---
 
-## Chapter 2:
+## Chapter 2
 
 ---
-
