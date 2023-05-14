@@ -2,7 +2,7 @@
 
 ---
 
-## Chapter 1: NO PAIN NO GAIN - NEVER GIVE UP
+## Chapter 1: PAIN - TO RELEASE THE WEAKNESS
 
 ---
 
@@ -161,6 +161,14 @@ This means **Phase 1** has closed. Thank you for joining me on this **First Chap
 
 ---
 
-## Chapter 2
+## Chapter 2: NATIVE APP - PROMISING LAND
 
 ---
+
+### Intial test and thought
+
+- There will be a frontend built on local. Send API request to backend
+- Now let's imagine the workflow:
+  - UI to setup key mapping: start mapping, frontend recaps the keyboard events (from and to), send to BE, BE do some schema mapping (event type in js is different from event type rdev), persist it
+  - UI to start/stop: send request to BE, BE start/stop `grab`.
+  - UI to displays keymap.
