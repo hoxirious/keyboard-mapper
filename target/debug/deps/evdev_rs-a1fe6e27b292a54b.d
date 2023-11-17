@@ -1,0 +1,11 @@
+/home/hoxirious/Documents/github/keyboard-mapper/target/debug/deps/evdev_rs-a1fe6e27b292a54b.rmeta: /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/lib.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/macros.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/device.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/enums.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/logging.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/uinput.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/util.rs
+
+/home/hoxirious/Documents/github/keyboard-mapper/target/debug/deps/evdev_rs-a1fe6e27b292a54b.d: /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/lib.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/macros.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/device.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/enums.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/logging.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/uinput.rs /home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/util.rs
+
+/home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/lib.rs:
+/home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/macros.rs:
+/home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/device.rs:
+/home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/enums.rs:
+/home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/logging.rs:
+/home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/uinput.rs:
+/home/hoxirious/.cargo/registry/src/index.crates.io-6f17d22bba15001f/evdev-rs-0.4.0/src/util.rs:

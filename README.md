@@ -172,3 +172,8 @@ This means **Phase 1** has closed. Thank you for joining me on this **First Chap
   - UI to setup key mapping: start mapping, frontend recaps the keyboard events (from and to), send to BE, BE do some schema mapping (event type in js is different from event type rdev), persist it
   - UI to start/stop: send request to BE, BE start/stop `grab`.
   - UI to displays keymap.
+
+### Re-planning
+- The keypress recording should be on frontend.
+- Client only sent the final decision to backend to store
+-
