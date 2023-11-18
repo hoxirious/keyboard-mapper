@@ -1,16 +1,15 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use crate::records::{process_event, EventTypeMap};
-use rdev::{grab, Event, EventType, Key};
+use rdev::{Event, EventType, GrabError, Key, grab};
 use std::collections::HashMap;
 use std::io::{self, BufRead};
-use std::rc::Rc;
-use std::sync::mpsc::{self, channel, Receiver, Sender, TryRecvError};
+use std::sync::mpsc::{channel, Receiver, Sender, TryRecvError};
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::time::Duration;
 use std::{fs, thread};
 use tauri::State;
-use tokio::sync::Mutex as AsyncMutex;
 #[macro_use]
 extern crate lazy_static;
 
@@ -44,45 +43,44 @@ lazy_static! {
     });
 }
 
-struct Speaker(Arc<(Mutex<Sender<()>>, Mutex<Receiver<()>>)>);
+struct Speaker(Arc<(Arc<Mutex<Sender<()>>>, Arc<Mutex<Receiver<()>>>)>);
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(speaker: State<Speaker>) {
     let w = speaker.0.clone();
-    thread::spawn(move || loop {
-        let rx = w.1.lock().unwrap();
+    thread::spawn(move || {
+        // let rx = w.1.lock().unwrap();
         println!("Working...");
         start();
-        match rx.try_recv() {
-            Ok(_) | Err(TryRecvError::Disconnected) => {
-                println!("Terminating.");
-            }
-            Err(TryRecvError::Empty) => {}
-        }
+        // match rx.try_recv() {
+        //     Ok(_) | Err(TryRecvError::Disconnected) => {
+        //         println!("Terminating.");
+        //         break;
+        //     }
+        //     Err(TryRecvError::Empty) => {}
+        // }
     });
-
 }
 
 #[tauri::command]
-fn meet(speaker: State<Speaker>) -> String{
-
+fn meet(speaker: State<Speaker>) -> String {
     let w = speaker.0.clone();
-    let tx = w.0.lock().unwrap().clone();
+    let tx = w.0.lock().unwrap();
     let mut line = String::new();
     let stdin = io::stdin();
     let _ = stdin.lock().read_line(&mut line);
 
     let _ = tx.send(());
-    "Hello from Rust!".to_string()
+    "happy".to_string()
 }
 
 fn main() {
     tauri::Builder::default()
         .manage(Speaker({
             let (tx, rx) = channel::<()>();
-            let tx = Mutex::new(tx);
-            let rx = Mutex::new(rx);
+            let tx = Arc::new(Mutex::new(tx));
+            let rx = Arc::new(Mutex::new(rx));
             Arc::new((tx, rx))
         }))
         .invoke_handler(tauri::generate_handler![greet, meet])
@@ -113,7 +111,13 @@ fn start() {
 
                 return process_event(event.to_owned());
             }
-            _ => Some(event),
+            EventType::ButtonPress(_) => {
+                println!("Mouse button pressed");
+                return None;
+            }
+            _ => {
+                return Some(event);
+            }
         },
     ) {
         println!("grab listen error: {:?}", err);
