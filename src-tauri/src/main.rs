@@ -1,7 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use crate::records::{process_event, EventTypeMap};
-use rdev::{Event, EventType, GrabError, Key, grab};
+use rdev::{grab, Event, EventType, GrabError, Key};
+use records::save_keybind;
 use std::collections::HashMap;
 use std::io::{self, BufRead};
 use std::sync::mpsc::{channel, Receiver, Sender, TryRecvError};
@@ -52,6 +53,7 @@ fn greet(speaker: State<Speaker>) {
     thread::spawn(move || {
         // let rx = w.1.lock().unwrap();
         println!("Working...");
+        // record_keybind();
         start();
         // match rx.try_recv() {
         //     Ok(_) | Err(TryRecvError::Disconnected) => {
@@ -110,6 +112,41 @@ fn start() {
                 }
 
                 return process_event(event.to_owned());
+            }
+            EventType::ButtonPress(_) => {
+                println!("Mouse button pressed");
+                return None;
+            }
+            _ => {
+                return Some(event);
+            }
+        },
+    ) {
+        println!("grab listen error: {:?}", err);
+    };
+}
+
+fn record_keybind() {
+    if let Err(err) = grab(
+        //test_infinity_loop
+        move |event: Event| match event.event_type {
+            EventType::KeyPress(key) => {
+                let is_special_key = SPECIAL_KEY_LIST.lock().unwrap().contains_key(&key);
+                if is_special_key {
+                    SPECIAL_KEY_LIST.lock().unwrap().insert(key, true);
+                    return Some(event);
+                }
+
+                return save_keybind(event.to_owned());
+            }
+            EventType::KeyRelease(key) => {
+                let is_special_key = SPECIAL_KEY_LIST.lock().unwrap().contains_key(&key);
+                if is_special_key {
+                    SPECIAL_KEY_LIST.lock().unwrap().insert(key, false);
+                    return Some(event);
+                }
+
+                return save_keybind(event.to_owned());
             }
             EventType::ButtonPress(_) => {
                 println!("Mouse button pressed");
