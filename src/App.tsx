@@ -14,12 +14,12 @@ export type DbInstanceType = {
 }[]
 
 function App() {
-    const [keyBindHolder, setKeyBindHolder] = useState<ReactNode>()
+    const [keyBindHolder, setKeyBindHolder] = useState<ReactNode|undefined>()
 
     const { dbInstance, dbCopyInstance, dbHasChange, dbIsValid } = useStoreState((store) => {
         return store.dbModel;
     });
-    const { loadDbInstance } = useStoreActions((actions) => actions.dbModel)
+    const { loadDbInstance, validateDb } = useStoreActions((actions) => actions.dbModel)
 
     useEffect(() => {
         const dbInstance: DbInstanceType = db;
@@ -47,9 +47,11 @@ function App() {
 
     function saveChanges(): void {
         if (dbIsValid) {
-            setKeyBindHolder(null);
+            console.log("Saving changes...");
+            // setKeyBindHolder(undefined);
         } else {
-            alert("Invalid database!");
+            // alert("Invalid database!");
+            console.log("Invalid database!");
         }
     }
 
@@ -70,16 +72,12 @@ function App() {
             <div className="row">
                 {keyBindHolder}
             </div>
-            {!keyBindHolder && (
-                <div className="row">
-                    <button onClick={() => addNewHolder()}>New Keybind</button>
-                </div>
-            )}
-            {keyBindHolder && (
-                <div className="row">
+            <div className="row">
+                <button onClick={() => addNewHolder()}>New Keybind</button>
+            {dbHasChange && (
                     <button id="save-button" onClick={() => saveChanges()}>Save Changes</button>
-                </div>
             )}
+            </div>
         </div>
     );
 }
