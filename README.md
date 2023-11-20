@@ -194,3 +194,10 @@ This means **Phase 1** has closed. Thank you for joining me on this **First Chap
 3. Create `start_grab` with the exisiting logic
 
 4. Frontend thingy.
+
+
+#### Todo
+1. Save keybind's mapto to the mapfrom. Need to link up between key and value.
+2. Allow add more keybind
+3. Persist to json file and reload
+4. Start grabbing.

@@ -3,17 +3,18 @@ import "./styles/components.scss"
 import { useEffect } from "react"
 
 interface MapperShortcutProps {
+    keybind_id: number;
     mapfrom: string;
     mapto: string;
 }
 
-export const MapperShortcut = ({mapfrom, mapto}: MapperShortcutProps) => {
+export const MapperShortcut = ({keybind_id, mapfrom, mapto}: MapperShortcutProps) => {
 
     return (
         <div className="mapper-shortcut">
-            <ButtonShortcut keybind={mapfrom} mapType={MapType.MapFrom} />
+            <ButtonShortcut id={keybind_id} keybind={mapfrom} mapType={MapType.MapFrom} />
             <p>to</p>
-            <ButtonShortcut keybind={mapto} mapType={MapType.MapTo} />
+            <ButtonShortcut id={keybind_id} keybind={mapto} mapType={MapType.MapTo} />
         </div>
     )
 }

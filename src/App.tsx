@@ -14,7 +14,7 @@ export type DbInstanceType = {
 }[]
 
 function App() {
-    const [keyBindHolder, setKeyBindHolder] = useState<ReactNode|undefined>()
+    const [keyBindHolder, setKeyBindHolder] = useState<ReactNode | undefined>()
 
     const { dbInstance, dbCopyInstance, dbHasChange, dbIsValid } = useStoreState((store) => {
         return store.dbModel;
@@ -41,7 +41,7 @@ function App() {
 
     function addNewHolder() {
         setKeyBindHolder(
-            <MapperShortcut mapfrom="" mapto="" />
+            <MapperShortcut mapfrom="" mapto="" keybind_id={dbCopyInstance.length}/>
         )
     }
 
@@ -62,10 +62,10 @@ function App() {
                 Keyboard Mapper
             </h1>
             {
-                dbInstance.map((item) => {
+                dbInstance.map((item, index) => {
                     return (
                         <div className="row">
-                            <MapperShortcut mapfrom={parseMapFrom(item.key)} mapto={parseMapTo(item.value)} />
+                            <MapperShortcut key={index} keybind_id={index} mapfrom={parseMapFrom(item.key)} mapto={parseMapTo(item.value)} />
                         </div>
                     )
                 })}
@@ -74,9 +74,9 @@ function App() {
             </div>
             <div className="row">
                 <button onClick={() => addNewHolder()}>New Keybind</button>
-            {dbHasChange && (
+                {dbHasChange && (
                     <button id="save-button" onClick={() => saveChanges()}>Save Changes</button>
-            )}
+                )}
             </div>
         </div>
     );

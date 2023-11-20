@@ -8,11 +8,12 @@ export enum MapType {
 }
 
 interface ButtonShortcutProps {
+    id: number;
     keybind: string;
     mapType: MapType;
 }
 
-export const ButtonShortcut = ({ keybind, mapType }: ButtonShortcutProps) => {
+export const ButtonShortcut = ({ id, keybind, mapType }: ButtonShortcutProps) => {
     const [keyBind, setKeyBind] = useState<string>(keybind);
 
     const { dbInstance, dbCopyInstance, dbHasChange, dbIsValid } = useStoreState((store) => {
@@ -37,7 +38,7 @@ export const ButtonShortcut = ({ keybind, mapType }: ButtonShortcutProps) => {
         else {
             console.log(dbCopyInstance.length);
             // value cannot find the key
-            updateValueCopyDb({ key: prev_keybind, value: obj });
+            updateValueCopyDb({ index: id, value: obj });
             setDbHasChange();
             validateDb();
             console.log(dbIsValid);

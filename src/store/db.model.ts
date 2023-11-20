@@ -16,8 +16,8 @@ interface DbState {
 
 interface DbActions {
     loadDbInstance: Action<this, DbInstanceType>;
-    updateValueCopyDb: Action<this, { key: string[], value: string[] }>;
-    updateKeyCopyDb: Action<this, {oldKey: string[], newKey: string[]}>;
+    updateValueCopyDb: Action<this, { index: number, value: string[] }>;
+    updateKeyCopyDb: Action<this, { oldKey: string[], newKey: string[] }>;
     setDbHasChange: Action<this, void>;
     validateDb: Action<this, void>;
 }
@@ -54,11 +54,11 @@ export const dbModel: DbModel = {
     validateDb: action((state, _) => {
         state.dbIsValid = true;
         for (let i = 0; i < state.dbCopyInstance.length; i++) {
-            if (state.dbCopyInstance[i].key.length === 0){
+            if (state.dbCopyInstance[i].key.length === 0) {
                 state.dbIsValid = false;
                 console.log("key is empty");
             }
-            if (state.dbCopyInstance[i].value.length === 0){
+            if (state.dbCopyInstance[i].value.length === 0) {
                 state.dbIsValid = false;
                 console.log("value is empty");
             }
@@ -66,14 +66,11 @@ export const dbModel: DbModel = {
     }),
     updateValueCopyDb: action((state, payload) => {
 
-        const { key, value } = payload;
-        const index = state.dbCopyInstance.findIndex((db) => db.key === key);
-        if (index !== -1) {
-            let newValue = [{ KeyPress: value[0] }, { KeyPress: value[1] },
-                            { KeyRelease: value[1] }, { KeyRelease: value[0] }];
+        const { index, value } = payload;
+        let newValue = [{ KeyPress: value[0] }, { KeyPress: value[1] },
+        { KeyRelease: value[1] }, { KeyRelease: value[0] }];
 
-            state.dbCopyInstance[index].value = newValue;
-        }
+        state.dbCopyInstance[index].value = newValue;
     }),
     updateKeyCopyDb: action((state, payload) => {
         const { oldKey, newKey } = payload;
