@@ -1,8 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use crate::records::{process_event, EventTypeMap};
-use rdev::{grab, Event, EventType, GrabError, Key};
-use records::save_keybind;
+use rdev::{grab, grab_t, Event, EventType, GrabError, Key};
+use records::{get_keybind, save_keybind};
 use std::collections::HashMap;
 use std::io::{self, BufRead};
 use std::sync::mpsc::{channel, Receiver, Sender, TryRecvError};
@@ -17,6 +17,7 @@ extern crate lazy_static;
 mod records;
 
 lazy_static! {
+    static ref IN_MEMORY_KEYBIND: Mutex<String> = Mutex::new(String::new());
     static ref MAPPER: Mutex<HashMap<String, Vec<EventType>>> = Mutex::new({
         let mut m = HashMap::new();
         let data = fs::read_to_string("./maplist.json").expect("Unable to read file");
@@ -77,6 +78,16 @@ fn meet(speaker: State<Speaker>) -> String {
     "happy".to_string()
 }
 
+#[tauri::command(async)]
+async fn record() -> String {
+    let handler = thread::spawn(move || {
+        record_keybind();
+    });
+    handler.join().unwrap();
+    println!("Record Successfully");
+    IN_MEMORY_KEYBIND.lock().unwrap().to_owned()
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(Speaker({
@@ -85,7 +96,7 @@ fn main() {
             let rx = Arc::new(Mutex::new(rx));
             Arc::new((tx, rx))
         }))
-        .invoke_handler(tauri::generate_handler![greet, meet])
+        .invoke_handler(tauri::generate_handler![greet, meet, record])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -127,8 +138,8 @@ fn start() {
 }
 
 fn record_keybind() {
-    if let Err(err) = grab(
-        //test_infinity_loop
+    if let Err(err) = grab_t(
+        // Exit once none
         move |event: Event| match event.event_type {
             EventType::KeyPress(key) => {
                 let is_special_key = SPECIAL_KEY_LIST.lock().unwrap().contains_key(&key);
@@ -137,7 +148,7 @@ fn record_keybind() {
                     return Some(event);
                 }
 
-                return save_keybind(event.to_owned());
+                return get_keybind(event.to_owned());
             }
             EventType::KeyRelease(key) => {
                 let is_special_key = SPECIAL_KEY_LIST.lock().unwrap().contains_key(&key);
@@ -146,11 +157,7 @@ fn record_keybind() {
                     return Some(event);
                 }
 
-                return save_keybind(event.to_owned());
-            }
-            EventType::ButtonPress(_) => {
-                println!("Mouse button pressed");
-                return None;
+                return get_keybind(event.to_owned());
             }
             _ => {
                 return Some(event);

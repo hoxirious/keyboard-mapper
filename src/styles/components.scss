@@ -1,0 +1,27 @@
+.button-shortcut {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 0 2rem;
+  height: 2.5rem;
+  width: 4rem;
+  max-width: 7rem;
+  margin: 2rem 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button-shortcut:hover {
+  background-color: #ccc;
+}
+
+.mapper-shortcut {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 1rem;
+
+}
+
+
+

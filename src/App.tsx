@@ -2,6 +2,8 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/tauri";
 import "./App.css";
+import { ButtonShortcut } from "./ButtonShortcut";
+import { MapperShortcut } from "./MapperShortcut";
 
 function App() {
     const [greetMsg, setGreetMsg] = useState("");
@@ -15,25 +17,24 @@ function App() {
         // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
         setGreetMsg(await invoke("meet"));
     }
+    async function record() {
+        // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+
+        let parsed_string = JSON.parse(await invoke("record"));
+        setGreetMsg(parsed_string);
+    }
+
 
     return (
         <div className="container">
-            <h1>Welcome to Tauri!</h1>
+
+            <h1 className="text-3xl font-bold underline text-black">
+                Keyboard Mapper
+            </h1>
 
             <div className="row">
-                <a href="https://vitejs.dev" target="_blank">
-                    <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-                </a>
-                <a href="https://tauri.app" target="_blank">
-                    <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-                </a>
-                <a href="https://reactjs.org" target="_blank">
-                    <img src={reactLogo} className="logo react" alt="React logo" />
-                </a>
+                <MapperShortcut />
             </div>
-
-            <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
             <div className="row">
                 <form
                     onSubmit={(e) => {
@@ -53,7 +54,7 @@ function App() {
                     <form
                         onSubmit={(e) => {
                             e.preventDefault();
-                            meet();
+                            record();
                         }}
                     >
                         <input

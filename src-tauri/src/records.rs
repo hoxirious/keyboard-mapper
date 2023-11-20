@@ -1,3 +1,4 @@
+use crate::IN_MEMORY_KEYBIND;
 use crate::{MAPPER, SPECIAL_KEY_LIST};
 use core::time;
 use rdev::{simulate, Event, EventType, Key, SimulateError};
@@ -74,6 +75,27 @@ fn write_to_map(mapper: Vec<EventTypeMap>) {
     let json: String = serde_json::to_string(&mapper).expect("Unable to serialize");
 
     fs::write("./maplist.json", &json).expect("Unable to write file");
+}
+
+pub fn get_keybind(event: Event) -> Option<Event> {
+    match event.event_type {
+        EventType::KeyPress(key) => {
+            let combination = get_combination(key);
+            if combination.key[0] != Key::Escape {
+                let combination = serde_json::to_string(&combination.key).unwrap();
+                IN_MEMORY_KEYBIND.lock().unwrap().clear();
+                IN_MEMORY_KEYBIND
+                    .lock()
+                    .unwrap()
+                    .push_str(&format!("{:?}", combination));
+            }
+            return Some(event);
+        }
+
+        _ => {
+            return None;
+        }
+    };
 }
 
 pub fn save_keybind(event: Event) -> Option<Event> {
