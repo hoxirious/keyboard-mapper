@@ -1,29 +1,57 @@
-import { useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/tauri";
 import "./App.css";
 import { ButtonShortcut } from "./ButtonShortcut";
 import { MapperShortcut } from "./MapperShortcut";
+import { useStoreActions, useStoreState } from "./store/hook.store";
+import db from "../src-tauri/maplist.json"
+
+export type DbInstanceType = {
+    key: string[];
+    value: ({ KeyPress: string; KeyRelease?: undefined; }
+        | { KeyRelease: string; KeyPress?: undefined; })[];
+}[]
 
 function App() {
-    const [greetMsg, setGreetMsg] = useState("");
-    const [name, setName] = useState("");
+    const [keyBindHolder, setKeyBindHolder] = useState<ReactNode>()
 
-    async function greet() {
-        // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-        setGreetMsg(await invoke("greet"));
-    }
-    async function meet() {
-        // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-        setGreetMsg(await invoke("meet"));
-    }
-    async function record() {
-        // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+    const { dbInstance, dbCopyInstance, dbHasChange, dbIsValid } = useStoreState((store) => {
+        return store.dbModel;
+    });
+    const { loadDbInstance } = useStoreActions((actions) => actions.dbModel)
 
-        let parsed_string = JSON.parse(await invoke("record"));
-        setGreetMsg(parsed_string);
+    useEffect(() => {
+        const dbInstance: DbInstanceType = db;
+        loadDbInstance(dbInstance);
+    }, [db])
+
+    const parseMapFrom = (key: string[]) => {
+        return key.join(" + ");
     }
 
+    const parseMapTo = (value: ({ KeyPress: string; KeyRelease?: undefined; } | { KeyRelease: string; KeyPress?: undefined; })[]) => {
+        let rt = value.map((item) => {
+            if (item.KeyPress) {
+                return item.KeyPress;
+            }
+        })
+        return rt.join(" + ").slice(0, -6);
+    }
+
+    function addNewHolder() {
+        setKeyBindHolder(
+            <MapperShortcut mapfrom="" mapto="" />
+        )
+    }
+
+    function saveChanges(): void {
+        if (dbIsValid) {
+            setKeyBindHolder(null);
+        } else {
+            alert("Invalid database!");
+        }
+    }
 
     return (
         <div className="container">
@@ -31,42 +59,27 @@ function App() {
             <h1 className="text-3xl font-bold underline text-black">
                 Keyboard Mapper
             </h1>
-
+            {
+                dbInstance.map((item) => {
+                    return (
+                        <div className="row">
+                            <MapperShortcut mapfrom={parseMapFrom(item.key)} mapto={parseMapTo(item.value)} />
+                        </div>
+                    )
+                })}
             <div className="row">
-                <MapperShortcut />
+                {keyBindHolder}
             </div>
-            <div className="row">
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        greet();
-                    }}
-                >
-                    <input
-                        id="greet-input"
-                        onChange={(e) => setName(e.currentTarget.value)}
-                        placeholder="Enter a name..."
-                    />
-                    <button type="submit">Greet</button>
-                </form>
-
+            {!keyBindHolder && (
                 <div className="row">
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            record();
-                        }}
-                    >
-                        <input
-                            id="meet-input"
-                            onChange={(e) => setName(e.currentTarget.value)}
-                            placeholder="Enter a name..."
-                        />
-                        <button type="submit">Meet</button>
-                    </form>
+                    <button onClick={() => addNewHolder()}>New Keybind</button>
                 </div>
-            </div>
-            <p>{greetMsg}</p>
+            )}
+            {keyBindHolder && (
+                <div className="row">
+                    <button id="save-button" onClick={() => saveChanges()}>Save Changes</button>
+                </div>
+            )}
         </div>
     );
 }

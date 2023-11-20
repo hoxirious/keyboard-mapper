@@ -1,13 +1,19 @@
 import { ButtonShortcut } from "./ButtonShortcut"
 import "./styles/components.scss"
+import { useEffect } from "react"
 
-export const MapperShortcut = () => {
+interface MapperShortcutProps {
+    mapfrom: string;
+    mapto: string;
+}
+
+export const MapperShortcut = ({mapfrom, mapto}: MapperShortcutProps) => {
 
     return (
         <div className="mapper-shortcut">
-            <ButtonShortcut />
-            <p>TO</p>
-            <ButtonShortcut />
+            <ButtonShortcut keybind={mapfrom} />
+            <p>to</p>
+            <ButtonShortcut keybind={mapto} />
         </div>
     )
 }
