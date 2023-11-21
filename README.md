@@ -172,3 +172,32 @@ This means **Phase 1** has closed. Thank you for joining me on this **First Chap
   - UI to setup key mapping: start mapping, frontend recaps the keyboard events (from and to), send to BE, BE do some schema mapping (event type in js is different from event type rdev), persist it
   - UI to start/stop: send request to BE, BE start/stop `grab`.
   - UI to displays keymap.
+
+### After trial and error
+
+- I have tried multiple methods:
+1. Grabbing event from client (like the initial thought), however browser listener is limitted in this feature, so not all key pressed is recorded.
+2. Grabbing from backend:
+    - Using Tauri State for globally manage state between custom commands, trying to keep a global channel to end the the grab loop.
+        - Failed, because the grab loop has blocked the receiver listener.
+    - Finally, I decided to dig deep into `rdev` library, and found `GrabStatus::Stop` flag that primarily used for break out of grab loop
+    Yet has not been called anywhere. So I tweaked the library and voila!.
+
+### Planning for next step
+
+#### Workflow:
+
+1. Create `record_keybind` that record user's customization keybinds. This includes the method to stop recording.
+
+2. Create functions to write back to json and reload static json
+
+3. Create `start_grab` with the exisiting logic
+
+4. Frontend thingy.
+
+
+#### Todo
+1. Save keybind's mapto to the mapfrom. Need to link up between key and value.
+2. Allow add more keybind
+3. Persist to json file and reload
+4. Start grabbing.

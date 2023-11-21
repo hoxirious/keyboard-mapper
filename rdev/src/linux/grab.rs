@@ -300,7 +300,6 @@ fn evdev_event_to_rdev_event(
 //         }
 //     }
 // }
-
 pub fn grab<T>(callback: T) -> Result<(), GrabError>
 where
     T: Fn(Event) -> Option<Event> + 'static,
@@ -328,11 +327,67 @@ where
             event_type,
         };
         if callback(rdev_event).is_some() {
+            // match event.event_code {
+            //     EventCode::EV_KEY(ref key) => match key {
+            //         EV_KEY::KEY_ESC => (None, GrabStatus::Stop),
+            //         _ => return (Some(event), GrabStatus::Continue),
+            //     },
+            //     _ => (Some(event), GrabStatus::Continue),
+            // }
+
             (Some(event), GrabStatus::Continue)
+
         } else {
             // callback returns None, swallow the event
+            println!("swallowing event");
             (None, GrabStatus::Continue)
         }
+    })?;
+    Ok(())
+}
+pub fn grab_t<T>(callback: T) -> Result<(), GrabError>
+where
+    T: Fn(Event) -> Option<Event> + 'static,
+{
+    let mut kb = Keyboard::new().ok_or(GrabError::KeyboardError)?;
+    let display = Display::new().ok_or(GrabError::MissingDisplayError)?;
+    let (width, height) = display.get_size().ok_or(GrabError::MissingDisplayError)?;
+    let (current_x, current_y) = display
+        .get_mouse_pos()
+        .ok_or(GrabError::MissingDisplayError)?;
+    let mut x = current_x as f64;
+    let mut y = current_y as f64;
+    let w = width as f64;
+    let h = height as f64;
+    filter_map_events(|event| {
+        let event_type = match evdev_event_to_rdev_event(&event, &mut x, &mut y, w, h) {
+            Some(rdev_event) => rdev_event,
+            // If we can't convert event, simulate it
+            None => return (Some(event), GrabStatus::Continue),
+        };
+        let name = kb.add(&event_type);
+        let rdev_event = Event {
+            time: SystemTime::now(),
+            name,
+            event_type,
+        };
+        if callback(rdev_event).is_some() {
+            match event.event_code {
+                EventCode::EV_KEY(ref key) => match key {
+                    EV_KEY::KEY_ESC => (Some(event), GrabStatus::Stop),
+                    _ => return (Some(event), GrabStatus::Continue),
+                },
+                _ => (Some(event), GrabStatus::Continue),
+            }
+
+            // (Some(event), GrabStatus::Continue)
+
+        } else {
+            // callback returns None, swallow the event
+            println!("swallowing event");
+            (None, GrabStatus::Continue)
+        }
+
     })?;
     Ok(())
 }

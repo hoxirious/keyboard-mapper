@@ -1,0 +1,64 @@
+.button-shortcut {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 0 2rem;
+  height: 2.5rem;
+  margin: 0 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: normal;
+  min-width: 8.5rem;
+}
+
+.button-shortcut:hover {
+  background-color: #ccc;
+}
+
+.mapper-shortcut {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.5rem 1rem;
+}
+
+.keybind-holder {
+    width: 30rem;
+    margin: auto;
+}
+
+.icon-action {
+    margin-left: 20px;
+}
+
+.icon-action:hover {
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+}
+
+.recording-block {
+  position: fixed; /* Sit on top of the page content */
+  display: block; /* Hidden by default */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.85); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer; /* Add a pointer on hover */
+}
+
+
+.recording-block > div {
+    display: relative;
+    position: absolute;
+    top: 40%;
+    left: 18%;
+}
+.recording-block > div > p {
+    color: #ccc;
+    font-size: 2.5rem;
+}
