@@ -6,7 +6,9 @@ import { ButtonShortcut } from "./ButtonShortcut";
 import { MapperShortcut } from "./MapperShortcut";
 import { useStoreActions, useStoreState } from "./store/hook.store";
 import db from "../src-tauri/maplist.json"
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrashCan } from "@fortawesome/free-regular-svg-icons";
+import "./styles/components.scss"
 export type DbInstanceType = {
     key: string[];
     value: ({ KeyPress: string; KeyRelease?: undefined; }
@@ -19,12 +21,16 @@ function App() {
     const { dbInstance, dbCopyInstance, dbHasChange, dbIsValid } = useStoreState((store) => {
         return store.dbModel;
     });
-    const { loadDbInstance, validateDb } = useStoreActions((actions) => actions.dbModel)
+    const { loadDbInstance, validateDb } = useStoreActions((actions) => actions.dbModel);
 
     useEffect(() => {
         const dbInstance: DbInstanceType = db;
         loadDbInstance(dbInstance);
     }, [db])
+
+    useEffect(() => {
+        validateDb();
+    }, [dbCopyInstance])
 
     const parseMapFrom = (key: string[]) => {
         return key.join(" + ");
@@ -41,14 +47,16 @@ function App() {
 
     function addNewHolder() {
         setKeyBindHolder(
-            <MapperShortcut mapfrom="" mapto="" keybind_id={dbCopyInstance.length}/>
+            <MapperShortcut mapfrom="" mapto="" keybind_id={dbCopyInstance.length} />
         )
     }
 
-    function saveChanges(): void {
+    async function saveChanges(): Promise<void> {
         if (dbIsValid) {
             console.log("Saving changes...");
-            // setKeyBindHolder(undefined);
+            await invoke("save_db", { db: JSON.stringify(dbCopyInstance) });
+            setKeyBindHolder(undefined);
+
         } else {
             // alert("Invalid database!");
             console.log("Invalid database!");
@@ -62,9 +70,9 @@ function App() {
                 Keyboard Mapper
             </h1>
             {
-                dbInstance.map((item, index) => {
+                dbCopyInstance.map((item, index) => {
                     return (
-                        <div className="row">
+                        <div className="row ">
                             <MapperShortcut key={index} keybind_id={index} mapfrom={parseMapFrom(item.key)} mapto={parseMapTo(item.value)} />
                         </div>
                     )

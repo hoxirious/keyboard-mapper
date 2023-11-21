@@ -20,6 +20,7 @@ interface DbActions {
     updateKeyCopyDb: Action<this, { oldKey: string[], newKey: string[] }>;
     setDbHasChange: Action<this, void>;
     validateDb: Action<this, void>;
+    deleteKeybind: Action<this, number>;
 }
 
 interface DbThunk {
@@ -81,5 +82,9 @@ export const dbModel: DbModel = {
         else {
             state.dbCopyInstance.push({ key: newKey, value: [] });
         }
+    }),
+
+    deleteKeybind: action((state, payload) => {
+        state.dbCopyInstance.splice(payload, 1);
     }),
 }

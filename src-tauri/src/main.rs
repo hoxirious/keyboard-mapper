@@ -1,24 +1,18 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use crate::records::{process_event, EventTypeMap};
-use rdev::{grab, grab_t, Event, EventType, GrabError, Key};
-use records::{get_keybind, save_keybind};
+use rdev::{grab, grab_t, Event, EventType, Key};
+use records::get_keybind;
 use std::collections::HashMap;
-use std::io::{self, BufRead};
-use std::sync::mpsc::{channel, Receiver, Sender, TryRecvError};
-use std::sync::Arc;
 use std::sync::Mutex;
-use std::time::Duration;
 use std::{fs, thread};
-use tauri::State;
 #[macro_use]
 extern crate lazy_static;
 
 mod records;
 
-lazy_static! {
-    static ref IN_MEMORY_KEYBIND: Mutex<String> = Mutex::new(String::new());
-    static ref MAPPER: Mutex<HashMap<String, Vec<EventType>>> = Mutex::new({
+fn load_db() -> Mutex<HashMap<String, Vec<EventType>>> {
+    Mutex::new({
         let mut m = HashMap::new();
         let data = fs::read_to_string("./maplist.json").expect("Unable to read file");
         let map_list: Vec<EventTypeMap> =
@@ -30,7 +24,12 @@ lazy_static! {
             m.insert(key_struct, value);
         }
         m
-    });
+    })
+}
+
+lazy_static! {
+    static ref IN_MEMORY_KEYBIND: Mutex<String> = Mutex::new(String::new());
+    static ref MAPPER: Mutex<HashMap<String, Vec<EventType>>> = load_db();
     static ref SPECIAL_KEY_LIST: Mutex<HashMap<Key, bool>> = Mutex::new({
         let mut m = HashMap::new();
         m.insert(Key::ControlLeft, false);
@@ -45,37 +44,18 @@ lazy_static! {
     });
 }
 
-struct Speaker(Arc<(Arc<Mutex<Sender<()>>>, Arc<Mutex<Receiver<()>>>)>);
-
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(speaker: State<Speaker>) {
-    let w = speaker.0.clone();
-    thread::spawn(move || {
-        // let rx = w.1.lock().unwrap();
-        println!("Working...");
-        // record_keybind();
-        start();
-        // match rx.try_recv() {
-        //     Ok(_) | Err(TryRecvError::Disconnected) => {
-        //         println!("Terminating.");
-        //         break;
-        //     }
-        //     Err(TryRecvError::Empty) => {}
-        // }
-    });
+#[tauri::command(async)]
+fn start_mapping() {
+    start();
 }
 
-#[tauri::command]
-fn meet(speaker: State<Speaker>) -> String {
-    let w = speaker.0.clone();
-    let tx = w.0.lock().unwrap();
-    let mut line = String::new();
-    let stdin = io::stdin();
-    let _ = stdin.lock().read_line(&mut line);
-
-    let _ = tx.send(());
-    "happy".to_string()
+#[tauri::command(async)]
+async fn save_db(db: String) {
+    fs::write("./maplist.json", &db).expect("Unable to write file");
+    // Reload the maplist
+    MAPPER.lock().unwrap().clear();
+    MAPPER.lock().unwrap().extend(load_db().lock().unwrap().to_owned());
 }
 
 #[tauri::command(async)]
@@ -90,13 +70,7 @@ async fn record() -> String {
 
 fn main() {
     tauri::Builder::default()
-        .manage(Speaker({
-            let (tx, rx) = channel::<()>();
-            let tx = Arc::new(Mutex::new(tx));
-            let rx = Arc::new(Mutex::new(rx));
-            Arc::new((tx, rx))
-        }))
-        .invoke_handler(tauri::generate_handler![greet, meet, record])
+        .invoke_handler(tauri::generate_handler![start_mapping, save_db, record])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

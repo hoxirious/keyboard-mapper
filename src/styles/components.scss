@@ -3,7 +3,7 @@
   border-radius: 3px;
   padding: 0 2rem;
   height: 2.5rem;
-  margin: 2rem 2rem;
+  margin: 0 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,9 +19,20 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 1rem;
-
+  margin: 0.5rem 1rem;
 }
 
+.keybind-holder {
+    width: 30rem;
+    margin: auto;
+}
 
+.icon-action {
+    margin-left: 20px;
+}
 
+.icon-action:hover {
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+}
