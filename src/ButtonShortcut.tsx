@@ -31,13 +31,12 @@ export const ButtonShortcut = ({ id, keybind, mapType }: ButtonShortcutProps) =>
         // Update the copy db
 
         if (mapType == MapType.MapFrom) {
-            updateKeyCopyDb({ oldKey: prev_keybind, newKey: obj });
+            updateKeyCopyDb({ index: id, newKey: obj });
             setDbHasChange();
             validateDb();
         }
         else {
             console.log(dbCopyInstance.length);
-            // value cannot find the key
             updateValueCopyDb({ index: id, value: obj });
             setDbHasChange();
             validateDb();

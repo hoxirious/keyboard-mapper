@@ -16,12 +16,11 @@ export type DbInstanceType = {
 }[]
 
 function App() {
-    const [keyBindHolder, setKeyBindHolder] = useState<ReactNode | undefined>()
 
     const { dbInstance, dbCopyInstance, dbHasChange, dbIsValid } = useStoreState((store) => {
         return store.dbModel;
     });
-    const { loadDbInstance, validateDb } = useStoreActions((actions) => actions.dbModel);
+    const { loadDbInstance, validateDb, createKeybind } = useStoreActions((actions) => actions.dbModel);
 
     useEffect(() => {
         const dbInstance: DbInstanceType = db;
@@ -46,16 +45,13 @@ function App() {
     }
 
     function addNewHolder() {
-        setKeyBindHolder(
-            <MapperShortcut mapfrom="" mapto="" keybind_id={dbCopyInstance.length} />
-        )
+        createKeybind();
     }
 
     async function saveChanges(): Promise<void> {
         if (dbIsValid) {
             console.log("Saving changes...");
             await invoke("save_db", { db: JSON.stringify(dbCopyInstance) });
-            setKeyBindHolder(undefined);
 
         } else {
             // alert("Invalid database!");
@@ -72,14 +68,11 @@ function App() {
             {
                 dbCopyInstance.map((item, index) => {
                     return (
-                        <div className="row ">
+                        <div className="row">
                             <MapperShortcut key={index} keybind_id={index} mapfrom={parseMapFrom(item.key)} mapto={parseMapTo(item.value)} />
                         </div>
                     )
                 })}
-            <div className="row">
-                {keyBindHolder}
-            </div>
             <div className="row">
                 <button onClick={() => addNewHolder()}>New Keybind</button>
                 {dbHasChange && (

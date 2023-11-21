@@ -17,10 +17,11 @@ interface DbState {
 interface DbActions {
     loadDbInstance: Action<this, DbInstanceType>;
     updateValueCopyDb: Action<this, { index: number, value: string[] }>;
-    updateKeyCopyDb: Action<this, { oldKey: string[], newKey: string[] }>;
+    updateKeyCopyDb: Action<this, { index: number, newKey: string[] }>;
     setDbHasChange: Action<this, void>;
     validateDb: Action<this, void>;
     deleteKeybind: Action<this, number>;
+    createKeybind: Action<this, void>;
 }
 
 interface DbThunk {
@@ -45,12 +46,13 @@ export const dbModel: DbModel = {
         state.dbHasChange = false;
         if (state.dbInstance.length !== state.dbCopyInstance.length)
             state.dbHasChange = true;
-        for (let i = 0; i < state.dbInstance.length; i++) {
-            if (state.dbInstance[i].key !== state.dbCopyInstance[i].key)
-                state.dbHasChange = true;
-            if (state.dbInstance[i].value !== state.dbCopyInstance[i].value)
-                state.dbHasChange = true;
-        }
+        else
+            for (let i = 0; i < state.dbInstance.length; i++) {
+                if (state.dbInstance[i].key !== state.dbCopyInstance[i].key)
+                    state.dbHasChange = true;
+                if (state.dbInstance[i].value !== state.dbCopyInstance[i].value)
+                    state.dbHasChange = true;
+            }
     }),
     validateDb: action((state, _) => {
         state.dbIsValid = true;
@@ -74,8 +76,7 @@ export const dbModel: DbModel = {
         state.dbCopyInstance[index].value = newValue;
     }),
     updateKeyCopyDb: action((state, payload) => {
-        const { oldKey, newKey } = payload;
-        const index = state.dbCopyInstance.findIndex((db) => db.key === oldKey);
+        const { index, newKey } = payload;
         if (index !== -1) {
             state.dbCopyInstance[index].key = newKey;
         }
@@ -85,6 +86,11 @@ export const dbModel: DbModel = {
     }),
 
     deleteKeybind: action((state, payload) => {
-        state.dbCopyInstance.splice(payload, 1);
+        if (payload)
+            state.dbCopyInstance.splice(payload, 1);
     }),
+
+    createKeybind: action((state, _) => {
+        state.dbCopyInstance.push({ key: [], value: [] });
+    })
 }
