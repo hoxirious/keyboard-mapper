@@ -5,7 +5,8 @@ use rdev::{grab, grab_t, Event, EventType, Key};
 use records::get_keybind;
 use std::collections::HashMap;
 use std::sync::Mutex;
-use std::{fs, thread};
+use std::{fs, process, thread};
+use tauri::{AppHandle, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
 #[macro_use]
 extern crate lazy_static;
 
@@ -44,9 +45,36 @@ lazy_static! {
     });
 }
 
+fn make_tray() -> SystemTray {
+    // <- a function that creates the system tray
+    let menu = SystemTrayMenu::new()
+        .add_item(CustomMenuItem::new("toggle".to_string(), "Hide"))
+        .add_item(CustomMenuItem::new("quit".to_string(), "Quit"));
+    return SystemTray::new().with_menu(menu);
+}
+fn handle_tray_event(app: &AppHandle, event: SystemTrayEvent) {
+    if let SystemTrayEvent::MenuItemClick { id, .. } = event {
+        if id.as_str() == "quit" {
+            process::exit(0);
+        }
+        if id.as_str() == "toggle" {
+            let window = app.get_window("main").unwrap();
+            let menu_item = app.tray_handle().get_item("toggle");
+            if window.is_visible().unwrap() {
+                let _ = window.hide();
+                let _ = menu_item.set_title("Show");
+            } else {
+                let _ = window.show();
+                let _ = window.center();
+                let _ = menu_item.set_title("Hide");
+            }
+        }
+    }
+}
+
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command(async)]
-fn start_mapping() {
+fn start_mapper() {
     start();
 }
 
@@ -55,7 +83,10 @@ async fn save_db(db: String) {
     fs::write("./maplist.json", &db).expect("Unable to write file");
     // Reload the maplist
     MAPPER.lock().unwrap().clear();
-    MAPPER.lock().unwrap().extend(load_db().lock().unwrap().to_owned());
+    MAPPER
+        .lock()
+        .unwrap()
+        .extend(load_db().lock().unwrap().to_owned());
 }
 
 #[tauri::command(async)]
@@ -65,12 +96,29 @@ async fn record() -> String {
     });
     handler.join().unwrap();
     println!("Record Successfully");
-    IN_MEMORY_KEYBIND.lock().unwrap().to_owned()
+    let rt = IN_MEMORY_KEYBIND.lock().unwrap().to_owned();
+    IN_MEMORY_KEYBIND.lock().unwrap().clear();
+    rt
+}
+
+#[tauri::command]
+fn hide_window(app: AppHandle) {
+    let window = app.get_window("main").unwrap();
+    let menu_item = app.tray_handle().get_item("toggle");
+    let _ = window.hide();
+    let _ = menu_item.set_title("Show");
 }
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![start_mapping, save_db, record])
+        .invoke_handler(tauri::generate_handler![
+            start_mapper,
+            save_db,
+            record,
+            hide_window
+        ])
+        .system_tray(make_tray())
+        .on_system_tray_event(handle_tray_event)
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -97,10 +145,6 @@ fn start() {
                 }
 
                 return process_event(event.to_owned());
-            }
-            EventType::ButtonPress(_) => {
-                println!("Mouse button pressed");
-                return None;
             }
             _ => {
                 return Some(event);

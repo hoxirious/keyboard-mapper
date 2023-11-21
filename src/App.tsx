@@ -9,6 +9,7 @@ import db from "../src-tauri/maplist.json"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashCan } from "@fortawesome/free-regular-svg-icons";
 import "./styles/components.scss"
+import { appWindow } from '@tauri-apps/api/window'
 export type DbInstanceType = {
     key: string[];
     value: ({ KeyPress: string; KeyRelease?: undefined; }
@@ -17,7 +18,7 @@ export type DbInstanceType = {
 
 function App() {
 
-    const { dbInstance, dbCopyInstance, dbHasChange, dbIsValid } = useStoreState((store) => {
+    const { dbInstance, isRecording, dbCopyInstance, dbHasChange, dbIsValid } = useStoreState((store) => {
         return store.dbModel;
     });
     const { loadDbInstance, validateDb, createKeybind } = useStoreActions((actions) => actions.dbModel);
@@ -59,9 +60,22 @@ function App() {
         }
     }
 
+    async function startMapper(): Promise<void> {
+        if (dbIsValid) {
+            await invoke("start_mapper");
+            await invoke('hide_window');
+        }
+    }
+
     return (
         <div className="container">
-
+            {isRecording && (
+                <div className="recording-block">
+                    <div>
+                        <p>Recording...Press Esc to exit</p>
+                    </div>
+                </div>
+            )}
             <h1 className="text-3xl font-bold underline text-black">
                 Keyboard Mapper
             </h1>
@@ -78,6 +92,7 @@ function App() {
                 {dbHasChange && (
                     <button id="save-button" onClick={() => saveChanges()}>Save Changes</button>
                 )}
+                <button id="start-mapper" onClick={() => startMapper()}>Start Mapper</button>
             </div>
         </div>
     );

@@ -19,13 +19,22 @@ export const ButtonShortcut = ({ id, keybind, mapType }: ButtonShortcutProps) =>
     const { dbInstance, dbCopyInstance, dbHasChange, dbIsValid } = useStoreState((store) => {
         return store.dbModel;
     });
-    const { loadDbInstance, validateDb, updateValueCopyDb, updateKeyCopyDb, setDbHasChange } = useStoreActions((actions) => actions.dbModel)
+    const { loadDbInstance, validateDb, updateValueCopyDb, updateKeyCopyDb, setDbHasChange, setIsRecording } = useStoreActions((actions) => actions.dbModel)
     async function record() {
         // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
+        setIsRecording(true);
+
         let prev_keybind = keyBind.split(" + ");
 
-        let parsed_string = JSON.parse(await invoke("record"));
+        let rt:string = await invoke("record");
+        console.log(rt);
+        if (rt == "" || rt == undefined || rt == null) {
+            setIsRecording(false);
+            console.log("No keybind recorded");
+            return;
+        }
+        let parsed_string = JSON.parse(rt);
         let obj: string[] = JSON.parse(parsed_string);
         console.log(obj);
         // Update the copy db
@@ -43,6 +52,7 @@ export const ButtonShortcut = ({ id, keybind, mapType }: ButtonShortcutProps) =>
             console.log(dbIsValid);
         }
         setKeyBind(obj.join(" + "));
+        setIsRecording(false);
     }
     return (
         <div className="button-shortcut" onClick={() => record()}>

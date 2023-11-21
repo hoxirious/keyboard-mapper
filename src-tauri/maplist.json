@@ -1,1 +1,1 @@
-[{"key":["ControlLeft","KeyX"],"value":[{"KeyPress":"ControlLeft"},{"KeyPress":"KeyC"},{"KeyRelease":"KeyC"},{"KeyRelease":"ControlLeft"}]},{"key":["ControlLeft","KeyC"],"value":[{"KeyPress":"ControlLeft"},{"KeyPress":"KeyX"},{"KeyRelease":"KeyX"},{"KeyRelease":"ControlLeft"}]}]
+[{"key":["ControlLeft","KeyX"],"value":[{"KeyPress":"ControlLeft"},{"KeyPress":"KeyC"},{"KeyRelease":"KeyC"},{"KeyRelease":"ControlLeft"}]}]

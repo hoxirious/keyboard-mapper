@@ -12,6 +12,7 @@ interface DbState {
     dbCopyInstance: DbInstanceType;
     dbHasChange: boolean;
     dbIsValid: boolean;
+    isRecording: boolean;
 }
 
 interface DbActions {
@@ -22,6 +23,7 @@ interface DbActions {
     validateDb: Action<this, void>;
     deleteKeybind: Action<this, number>;
     createKeybind: Action<this, void>;
+    setIsRecording: Action<this, boolean>;
 }
 
 interface DbThunk {
@@ -37,7 +39,11 @@ export const dbModel: DbModel = {
     dbCopyInstance: [],
     dbHasChange: false,
     dbIsValid: false,
+    isRecording: false,
 
+    setIsRecording: action((state, payload) => {
+        state.isRecording = payload;
+    }),
     loadDbInstance: action((state, payload) => {
         state.dbInstance = payload;
         state.dbCopyInstance = payload;
