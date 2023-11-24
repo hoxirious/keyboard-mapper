@@ -13,6 +13,7 @@ interface DbState {
     dbHasChange: boolean;
     dbIsValid: boolean;
     isRecording: boolean;
+    mapStarted: boolean;
 }
 
 interface DbActions {
@@ -24,6 +25,7 @@ interface DbActions {
     deleteKeybind: Action<this, number>;
     createKeybind: Action<this, void>;
     setIsRecording: Action<this, boolean>;
+    setMapStarted: Action<this, boolean>;
 }
 
 interface DbThunk {
@@ -40,7 +42,11 @@ export const dbModel: DbModel = {
     dbHasChange: false,
     dbIsValid: false,
     isRecording: false,
+    mapStarted: false,
 
+    setMapStarted: action((state, payload) => {
+        state.mapStarted = payload;
+    }),
     setIsRecording: action((state, payload) => {
         state.isRecording = payload;
     }),

@@ -8,7 +8,7 @@
 
 - [x] Key mapping
 - [x] Listen for combination
-- [ ] Native app
+- [x] Native app
 
 ---
 
