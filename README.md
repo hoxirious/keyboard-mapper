@@ -13,7 +13,7 @@ https://github.com/hoxirious/keyboard-mapper/assets/65211251/f7d29f77-7cb3-4e22-
 
 - [x] Key mapping
 - [x] Listen for combination
-- [ ] Native app
+- [x] Native app
 
 ---
 

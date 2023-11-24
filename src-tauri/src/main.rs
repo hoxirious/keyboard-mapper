@@ -1,8 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use crate::records::{process_event, EventTypeMap};
+use crate::records::{process_map_event, EventTypeMap};
 use rdev::{grab, grab_t, Event, EventType, Key};
-use records::get_keybind;
+use records::process_record_event;
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::{fs, process, thread};
@@ -75,6 +75,7 @@ fn handle_tray_event(app: &AppHandle, event: SystemTrayEvent) {
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command(async)]
 fn start_mapper() {
+    println!("Starting mapper");
     start();
 }
 
@@ -92,7 +93,7 @@ async fn save_db(db: String) {
 #[tauri::command(async)]
 async fn record() -> String {
     let handler = thread::spawn(move || {
-        record_keybind();
+        record_combination();
     });
     handler.join().unwrap();
     println!("Record Successfully");
@@ -135,7 +136,7 @@ fn start() {
                     return Some(event);
                 }
 
-                return process_event(event.to_owned());
+                return process_map_event(event.to_owned());
             }
             EventType::KeyRelease(key) => {
                 let is_special_key = SPECIAL_KEY_LIST.lock().unwrap().contains_key(&key);
@@ -144,7 +145,7 @@ fn start() {
                     return Some(event);
                 }
 
-                return process_event(event.to_owned());
+                return process_map_event(event.to_owned());
             }
             _ => {
                 return Some(event);
@@ -155,7 +156,7 @@ fn start() {
     };
 }
 
-fn record_keybind() {
+fn record_combination() {
     if let Err(err) = grab_t(
         // Exit once none
         move |event: Event| match event.event_type {
@@ -166,7 +167,7 @@ fn record_keybind() {
                     return Some(event);
                 }
 
-                return get_keybind(event.to_owned());
+                return process_record_event(event.to_owned());
             }
             EventType::KeyRelease(key) => {
                 let is_special_key = SPECIAL_KEY_LIST.lock().unwrap().contains_key(&key);
@@ -175,7 +176,7 @@ fn record_keybind() {
                     return Some(event);
                 }
 
-                return get_keybind(event.to_owned());
+                return process_record_event(event.to_owned());
             }
             _ => {
                 return Some(event);

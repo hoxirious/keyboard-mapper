@@ -83,7 +83,12 @@ button:active {
   border-color: #396cd8;
   background-color: #e8e8e8;
 }
-
+button:disabled,
+button[disabled]{
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
 input,
 button {
   outline: none;
