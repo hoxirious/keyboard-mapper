@@ -57,3 +57,36 @@ where
     }
     Ok(())
 }
+
+pub fn grab_t<T>(callback: T) -> Result<(), GrabError>
+where
+    T: FnMut(Event) -> Option<Event> + 'static,
+{
+    if callback(rdev_event).is_some() {
+        match event.event_code {
+            EventCode::EV_KEY(ref key) => match key {
+                EV_KEY::KEY_ESC => (None, GrabStatus::Stop),
+                _ => unsafe {
+                GLOBAL_CALLBACK = Some(Box::new(callback));
+                set_key_hook(raw_callback)?;
+                set_mouse_hook(raw_callback)?;
+
+                GetMessageA(null_mut(), null_mut(), 0, 0);
+            },
+            },
+            _ => unsafe {
+                GLOBAL_CALLBACK = Some(Box::new(callback));
+                set_key_hook(raw_callback)?;
+                set_mouse_hook(raw_callback)?;
+
+                GetMessageA(null_mut(), null_mut(), 0, 0);
+            },
+        }
+    } else {
+        // callback returns None, swallow the event
+        println!("swallowing event");
+        (None, GrabStatus::Continue)
+    }
+
+    Ok(())
+}

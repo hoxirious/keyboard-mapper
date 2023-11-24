@@ -324,6 +324,9 @@ pub fn display_size() -> Result<(u64, u64), DisplayError> {
 #[cfg(target_os = "linux")]
 pub use crate::linux::grab_t as _grab_t;
 #[cfg(feature = "unstable_grab")]
+#[cfg(target_os = "windows")]
+pub use crate::windows::grab_t as _grab_t;
+#[cfg(feature = "unstable_grab")]
 pub fn grab_t<T>(callback: T) -> Result<(), GrabError>
 where
     T: Fn(Event) -> Option<Event> + 'static,
